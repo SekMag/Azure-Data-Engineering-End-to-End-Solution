@@ -107,6 +107,21 @@ The project's objective is to build an end-to-end solution for data processing a
 
 By following these steps and utilizing the provided tools and scripts, you can successfully implement and test the end-to-end Azure Data Engineering project.
 
+## Continuous Integration
+
+GitHub Actions runs on pushes, pull requests, and manual dispatches. The workflow checks that the Python files in `Databricks_Notebooks` compile successfully. It does not execute notebooks or connect to Azure services.
+
+## Continuous Deployment
+
+On pushes to `main` (or manual dispatch), GitHub Actions deploys the Python notebooks from `Databricks_Notebooks` to the configured Databricks workspace path. Existing notebooks with the same names are overwritten; the `.dbc` and `.zip` archives are not deployed.
+
+Before deploying, add these values under the repository's **Settings > Secrets and variables > Actions**:
+
+- Secrets: `DATABRICKS_HOST` (workspace URL) and `DATABRICKS_TOKEN` (Databricks access token).
+- Variable: `DATABRICKS_WORKSPACE_PATH` (destination path, for example `/Shared/End-to-End-Azure-Data-Engineering-Project`).
+
+Never commit credentials to the repository. This workflow deploys notebooks only; it does not deploy Azure Data Factory or Synapse resources.
+
 #### Support
 - Feel free to reach out for any further assistance or clarification regarding the project setup and implementation. Email at raysachin1997@gmail.com
 - Happy data engineering!
