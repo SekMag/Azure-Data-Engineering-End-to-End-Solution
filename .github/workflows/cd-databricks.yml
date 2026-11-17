@@ -1,0 +1,43 @@
+name: Deploy Databricks notebooks
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy Python notebooks to Databricks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@v1.26.0
+
+      - name: Validate deployment configuration
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_WORKSPACE_PATH: ${{ vars.DATABRICKS_WORKSPACE_PATH }}
+        run: |
+          test -n "$DATABRICKS_HOST" || (echo "Missing GitHub secret: DATABRICKS_HOST" && exit 1)
+          test -n "$DATABRICKS_TOKEN" || (echo "Missing GitHub secret: DATABRICKS_TOKEN" && exit 1)
+          test -n "$DATABRICKS_WORKSPACE_PATH" || (echo "Missing GitHub variable: DATABRICKS_WORKSPACE_PATH" && exit 1)
+
+      - name: Deploy Python notebooks
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_WORKSPACE_PATH: ${{ vars.DATABRICKS_WORKSPACE_PATH }}
+        run: |
+          mkdir -p /tmp/databricks-notebooks
+          cp Databricks_Notebooks/*.py /tmp/databricks-notebooks/
+          databricks workspace mkdirs "$DATABRICKS_WORKSPACE_PATH"
+          databricks workspace import-dir /tmp/databricks-notebooks "$DATABRICKS_WORKSPACE_PATH" --overwrite
