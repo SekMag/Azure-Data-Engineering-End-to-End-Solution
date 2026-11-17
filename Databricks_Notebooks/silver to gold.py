@@ -36,4 +36,3 @@ for name in table_name:
 
 # COMMAND ----------
 
-display(df)
